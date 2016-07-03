@@ -6,6 +6,11 @@
 
 
 namespace AndroidDevice {
+	enum SensorError {
+		SENSOR_NOT_FOUND = -1,
+		SENSOR_FREEZE = -2
+	}
+
 	class AndroidSensorManager {
 		public : 
 			AndroidSensorManager();

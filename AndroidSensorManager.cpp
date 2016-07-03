@@ -22,14 +22,12 @@ std::vector<float> AndroidSensorManager::readGenericSensor(int sensor, int *res)
 
 	const ASensor *genericSensor = ASensorManager_getDefaultSensor(sensorManager, sensor);
 	if(!genericSensor) {
-		//std::cout << "Sensor not found" << std::endl;
-		if(res)*res = -1;
+		if(res)*res = SensorError::SENSOR_NOT_FOUND;
 		return data;
 	}
 
 	ASensorEventQueue *sensorEventQueue = ASensorManager_createEventQueue(sensorManager, state.looper, LOOPER_ID_USER, NULL, NULL);
 	ASensorEventQueue_enableSensor(sensorEventQueue, genericSensor);
-	//ASensorEventQueue_setEventRate(sensorEventQueue, genericSensor, (1000L/60)  * 1000);
 	
 	const clock_t begin_time = clock();
 	while((float(clock() - begin_time)/CLOCKS_PER_SEC)*1000.0 <= 1000) { //Needed for not freezing the device, it the sensor doens't respond
@@ -38,9 +36,6 @@ std::vector<float> AndroidSensorManager::readGenericSensor(int sensor, int *res)
 		struct android_poll_source *source;
 
 		while((ident = ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0) {
-			//if(source)
-			//	source->process(&state, source);
-
 			if(ident == LOOPER_ID_USER) {
 				if(genericSensor != NULL) {
 					ASensorEvent event;
@@ -83,7 +78,7 @@ std::vector<float> AndroidSensorManager::readGenericSensor(int sensor, int *res)
 		}
 	}
 	
-	if(res)*res = -2;
+	if(res)*res = SensorError::SENSOR_FREEZE;
 	return data;
 }
 
